@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerMoveController : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class PlayerMoveController : MonoBehaviour
     private static int runHash = Animator.StringToHash("Run");
     private static int jumpHash = Animator.StringToHash("Jump");
     private static int fallHash = Animator.StringToHash("Fall");
+    private static int diedHash = Animator.StringToHash("Died");
     private int curAniHash; // 현재 플레이어의 상태를 뜻하는 해시값
 
     // 이동에 필요한 참조와 값들 선언
@@ -21,9 +23,19 @@ public class PlayerMoveController : MonoBehaviour
 
     private float x;        // 플레이어가 이동하는 방향의 축
     private float ScaleX;   // 플레이어의 x축의 스케일 값을 가져오는 float 자료형
+    private UImanager uiManager;
+
+    // 플레이어 유니티 이벤트 함수
+    public UnityAction OnDied;
+    
 
     // =========================================================================================
     // =========================================================================================
+    private void Start()
+    {
+        uiManager = GetComponent<UImanager>();
+        
+    }
     private void Update()
     {
         // A, D, 화살표 좌우로 플레이어 이동이 가능하다.
@@ -108,6 +120,22 @@ public class PlayerMoveController : MonoBehaviour
         {
             curAniHash = checkAniHash;
             animator.Play(curAniHash);
+        }
+    }
+    // =========================================================================================
+    // =========================================================================================
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+        // 장애물과 충돌 시, 게임 오버
+        if (collision.gameObject.tag == "DiedOBJ")
+        {
+            OnDied?.Invoke();
+            animator.Play(diedHash);
+        }
+        // 골인 지점과 충돌 시, 게임 클리어
+        if (collision.gameObject.tag == "EndingGoal")
+        {
+            OnDied?.Invoke();
         }
     }
 }
